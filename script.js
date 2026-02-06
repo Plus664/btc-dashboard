@@ -15,8 +15,6 @@ async function fetchCoincheck() {
     const res = await fetch(`${API_BASE}/coincheck`);
     const data = await res.json();
 
-    console.log("coincheck data: ", data);
-
     const price = Number(data.last);
     const bid = Number(data.bid);
     const ask = Number(data.ask);
@@ -44,7 +42,6 @@ async function fetchCoincheck() {
 
     lastCcPrice = price;
   } catch (e) {
-    console.error("Coincheck Error: ", e)
     document.getElementById("cc-price").textContent = "エラー";
   }
 }
@@ -54,16 +51,34 @@ async function fetchCoingecko() {
     const res = await fetch(`${API_BASE}/coingecko`);
     const data = await res.json();
 
-    const priceUSD = data.market_data.current_price.usd;
-    const priceJPY = data.market_data.current_price.jpy;
-    const volume = data.market_data.total_volume.usd;
+    console.log("coingecko data:", data);
 
-    document.getElementById("cg-price-jpy").textContent = "¥ " + priceJPY.toLocaleString();
-    document.getElementById("cg-price-usd").textContent = "$ " + priceUSD.toLocaleString();
-    document.getElementById("cg-volume").textContent =
-      "24時間出来高: $" + volume.toLocaleString();
+    const priceUSD = data?.market_data?.current_price?.usd ?? null;
+    const priceJPY = data?.market_data?.current_price?.jpy ?? null;
+    const volumeUSD = data?.market_data?.total_volume?.usd ?? null;
+
+    if (!priceUSD || !priceJPY) {
+      document.getElementById("cg-price-jpy").textContent = "エラー";
+      document.getElementById("cg-price-usd").textContent = "";
+      document.getElementById("cg-volume").textContent = "";
+      return;
+    }
+
+    document.getElementById("cg-price-jpy").textContent =
+      "¥ " + priceJPY.toLocaleString();
+
+    document.getElementById("cg-price-usd").textContent =
+      "$ " + priceUSD.toLocaleString();
+
+    if (volumeUSD) {
+      document.getElementById("cg-volume").textContent =
+        "24時間出来高: $" + volumeUSD.toLocaleString();
+    } else {
+      document.getElementById("cg-volume").textContent = "24時間出来高: -";
+    }
+
   } catch (e) {
-    console.error("Coingecko Error", e)
+    console.error("fetchCoingecko error:", e);
     document.getElementById("cg-price-jpy").textContent = "エラー";
   }
 }
@@ -145,7 +160,4 @@ fetchFed();
 fetchWhale();
 
 setInterval(fetchCoincheck, 3000);
-
 setInterval(fetchCoingecko, 3000);
-
-
