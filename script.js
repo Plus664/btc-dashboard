@@ -67,14 +67,24 @@ async function fetchCoincheck() {
     lastCcPrice = price;
 
     // --- チャート更新（ここが重要） ---
-    chartData.push({
+    /*chartData.push({
       time: Math.floor(ts / 1000),
       value: price,
     });
 
     if (chartData.length > 100) chartData.shift();
 
-    lineSeries.setData(chartData);
+    lineSeries.setData(chartData);*/
+    if (chart && lineSeries) {
+      chartData.push({
+        time: Math.floor(ts / 1000),
+        value: price,
+      });
+
+      if (chartData.length > 100) chartData.shift();
+
+      lineSeries.setData(chartData);
+    }
 
   } catch (e) {
     document.getElementById("cc-price").textContent = "エラー";
@@ -190,7 +200,7 @@ function checkAlerts(price, pct) {
 }
 
 // --- チャート初期化 ---
-const chartContainer = document.getElementById("chart-container");
+/*const chartContainer = document.getElementById("chart-container");
 const chart = LightweightCharts.createChart(chartContainer, {
   layout: {
     background: { color: "#171720" },
@@ -208,6 +218,7 @@ const chart = LightweightCharts.createChart(chartContainer, {
   },
 });
 
+
 const lineSeries = chart.addLineSeries({
   color: "#3ba7ff",
   lineWidth: 2,
@@ -215,6 +226,41 @@ const lineSeries = chart.addLineSeries({
 
 // チャート用のデータ保持
 let chartData = [];
+*/
+// --- チャート初期化（最小構成） ---
+let chart, lineSeries, chartData = [];
+
+window.addEventListener("load", () => {
+  const container = document.getElementById("chart-container");
+  console.log("LightweightCharts:", LightweightCharts);
+  console.log("container:", container);
+
+  chart = LightweightCharts.createChart(container, {
+    layout: {
+      background: { color: "#171720" },
+      textColor: "#ffffff",
+    },
+    grid: {
+      vertLines: { color: "rgba(255,255,255,0.05)" },
+      horzLines: { color: "rgba(255,255,255,0.05)" },
+    },
+    timeScale: {
+      borderColor: "rgba(255,255,255,0.1)",
+    },
+    rightPriceScale: {
+      borderColor: "rgba(255,255,255,0.1)",
+    },
+  });
+
+  console.log("chart:", chart);
+
+  lineSeries = chart.addLineSeries({
+    color: "#3ba7ff",
+    lineWidth: 2,
+  });
+
+  chartData = [];
+});
 
 fetchCoincheck();
 fetchOrderbook();
