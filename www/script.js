@@ -43,7 +43,7 @@ function canAlert(type) {
   return true;
 }
 
-const API_BASE = "/api";
+const API_BASE = "https://btc-api.soccer710a.workers.dev";
 
 let lastCcPrice = null;
 
@@ -53,6 +53,17 @@ function logAlert(msg) {
   div.className = "alert-item";
   div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
   log.prepend(div);
+}
+
+async function subscribePush() {
+  const reg = await navigator.serviceWorker.ready
+
+  const sub = await reg.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: "BAkjGNHWbVmW7zuol7AugAr53mxBD89pZw9HQycPdSVsGRvPhGznZ5FiZGrLLsLH_41D9Q8DlhqHBDNIUzpa6QY"
+  })
+
+  console.log("subscribed:", JSON.stringify(sub))
 }
 
 async function fetchCoincheck() {
@@ -101,7 +112,7 @@ async function fetchCoincheck() {
 
 async function fetchOrderbook() {
   try {
-    const res = await fetch("/api/orderbook");
+    const res = await fetch(`${API_BASE}/orderbook`);
     const data = await res.json();
 
     const bids = data.bids.slice(0, 5)
