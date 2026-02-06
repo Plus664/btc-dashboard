@@ -99,6 +99,31 @@ iframe {
   border-radius: 10px;
 }
 
+.chart-range-buttons {
+  margin-bottom: 8px;
+}
+
+.chart-range-buttons button {
+  margin-right: 6px;
+  padding: 4px 8px;
+  background: #2a2a35;
+  color: #fff;
+  border: 1px solid #444;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.chart-range-buttons button:hover {
+  background: #3ba7ff;
+  border-color: #3ba7ff;
+}
+
+.chart-range-buttons button.active {
+  background: #3ba7ff;
+  border-color: #3ba7ff;
+  color: #000;
+}
+
 /* 注意書き（相場判断ガイド） */
 .guide-card {
   margin-top: 20px;

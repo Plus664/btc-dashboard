@@ -89,15 +89,9 @@ async function fetchCoincheck() {
 
     // --- チャート更新（ここが重要） ---
     if (btcChart) {
-      chartLabels.push(new Date(ts).toLocaleTimeString());
-      chartPrices.push(price);
-
-      if (chartLabels.length > 100) {
-        chartLabels.shift();
-        chartPrices.shift();
-      }
-
-      btcChart.update();
+      const t = new Date(ts);
+      fullChartData.push({ time: t, price });
+      updateChartRange(currentRange);
     }
 
   } catch (e) {
@@ -206,6 +200,53 @@ function checkAlerts(price, pct) {
 let btcChart;
 let chartLabels = [];
 let chartPrices = [];
+let fullChartData = [];
+let currentRange = "1H";
+
+document.querySelectorAll(".chart-range-buttons button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".chart-range-buttons button")
+      .forEach(b => b.classList.remove("active"));
+
+    btn.classList.add("active");
+    updateChartRange(btn.dataset.range);
+  });
+});
+
+function updateChartRange(range) {
+  currentRange = range;
+
+  const now = Date.now();
+  let cutoff = now;
+
+  if (range === "1H") cutoff -= 1 * 60 * 60 * 1000;
+  if (range === "1D") cutoff -= 24 * 60 * 60 * 1000;
+  if (range === "1W") cutoff -= 7 * 24 * 60 * 60 * 1000;
+  if (range === "1M") cutoff -= 30 * 24 * 60 * 60 * 1000;
+  if (range === "1Y") cutoff -= 365 * 24 * 60 * 60 * 1000;
+
+  const filtered = fullChartData.filter(d => d.time.getTime() >= cutoff);
+
+  chartLabels.length = 0;
+  chartPrices.length = 0;
+
+  for (const d of filtered) {
+    let label;
+
+    if (range === "1H" || range === "1D") {
+      label = d.time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    } else if (range === "1W" || range === "1M") {
+      label = `${d.time.getMonth() + 1}/${d.time.getDate()}`;
+    } else if (range === "1Y") {
+      label = `${d.time.getFullYear()}/${d.time.getMonth() + 1}`;
+    }
+
+    chartLabels.push(label);
+    chartPrices.push(d.price);
+  }
+
+  btcChart.update();
+}
 
 window.addEventListener("load", () => {
   const ctx = document.getElementById("btcChart").getContext("2d");

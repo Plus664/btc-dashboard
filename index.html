@@ -42,13 +42,6 @@
       <div class="small" id="halving-date"></div>
     </div>
 
-    <!-- 金利 -->
-    <div class="card">
-      <div class="label">米国金利（Fed）</div>
-      <div class="value" id="fed-rate">準備中</div>
-      <div class="small" id="fed-note">※ 後で FRED API に接続</div>
-    </div>
-
     <!-- クジラ -->
     <div class="card">
       <div class="label">クジラの動き</div>
@@ -86,6 +79,13 @@
     <div class="card">
       <div class="label">チャート（BTC/JPY）</div>
       <canvas id="btcChart" height="320"></canvas>
+      <div class="chart-range-buttons">
+        <button data-range="1H">1H</button>
+        <button data-range="1D">1D</button>
+        <button data-range="1W">1W</button>
+        <button data-range="1M">1M</button>
+        <button data-range="1Y">1Y</button>
+      </div>
     </div>
 
   </div>
