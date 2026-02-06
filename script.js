@@ -67,23 +67,16 @@ async function fetchCoincheck() {
     lastCcPrice = price;
 
     // --- チャート更新（ここが重要） ---
-    /*chartData.push({
-      time: Math.floor(ts / 1000),
-      value: price,
-    });
+    if (btcChart) {
+      chartLabels.push(new Date(ts).toLocaleTimeString());
+      chartPrices.push(price);
 
-    if (chartData.length > 100) chartData.shift();
+      if (chartLabels.length > 100) {
+        chartLabels.shift();
+        chartPrices.shift();
+      }
 
-    lineSeries.setData(chartData);*/
-    if (chart && lineSeries) {
-      chartData.push({
-        time: Math.floor(ts / 1000),
-        value: price,
-      });
-
-      if (chartData.length > 100) chartData.shift();
-
-      lineSeries.setData(chartData);
+      btcChart.update();
     }
 
   } catch (e) {
@@ -199,67 +192,37 @@ function checkAlerts(price, pct) {
   }
 }
 
-// --- チャート初期化 ---
-/*const chartContainer = document.getElementById("chart-container");
-const chart = LightweightCharts.createChart(chartContainer, {
-  layout: {
-    background: { color: "#171720" },
-    textColor: "#ffffff",
-  },
-  grid: {
-    vertLines: { color: "rgba(255,255,255,0.05)" },
-    horzLines: { color: "rgba(255,255,255,0.05)" },
-  },
-  timeScale: {
-    borderColor: "rgba(255,255,255,0.1)",
-  },
-  rightPriceScale: {
-    borderColor: "rgba(255,255,255,0.1)",
-  },
-});
-
-
-const lineSeries = chart.addLineSeries({
-  color: "#3ba7ff",
-  lineWidth: 2,
-});
-
-// チャート用のデータ保持
-let chartData = [];
-*/
-// --- チャート初期化（最小構成） ---
-let chart, lineSeries, chartData = [];
+let btcChart;
+let chartLabels = [];
+let chartPrices = [];
 
 window.addEventListener("load", () => {
-  const container = document.getElementById("chart-container");
-  console.log("LightweightCharts:", LightweightCharts);
-  console.log("container:", container);
+  const ctx = document.getElementById("btcChart").getContext("2d");
 
-  chart = LightweightCharts.createChart(container, {
-    layout: {
-      background: { color: "#171720" },
-      textColor: "#ffffff",
+  btcChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: chartLabels,
+      datasets: [{
+        label: "BTC/JPY",
+        data: chartPrices,
+        borderColor: "#3ba7ff",
+        borderWidth: 2,
+        tension: 0.2,
+      }]
     },
-    grid: {
-      vertLines: { color: "rgba(255,255,255,0.05)" },
-      horzLines: { color: "rgba(255,255,255,0.05)" },
-    },
-    timeScale: {
-      borderColor: "rgba(255,255,255,0.1)",
-    },
-    rightPriceScale: {
-      borderColor: "rgba(255,255,255,0.1)",
-    },
+    options: {
+      responsive: true,
+      scales: {
+        x: { display: false },
+        y: {
+          ticks: {
+            callback: v => "¥" + v.toLocaleString()
+          }
+        }
+      }
+    }
   });
-
-  console.log("chart:", chart);
-
-  lineSeries = chart.addLineSeries({
-    color: "#3ba7ff",
-    lineWidth: 2,
-  });
-
-  chartData = [];
 });
 
 fetchCoincheck();
