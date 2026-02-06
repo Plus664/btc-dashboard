@@ -5,142 +5,7 @@
   <meta charset="UTF-8">
   <title>BTC ダッシュボード</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    :root {
-      --bg: #0b0b0f;
-      --card: #171720;
-      --accent: #3ba7ff;
-      --text-main: #f5f5f5;
-      --text-sub: #a0a0b0;
-      --danger: #ff4d6a;
-      --success: #3bd17f;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      padding: 16px;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #1b1b2a 0, #050509 55%, #000 100%);
-      color: var(--text-main);
-    }
-
-    h1 {
-      margin: 0 0 4px;
-      font-size: 1.4rem;
-    }
-
-    .subtitle {
-      font-size: 0.85rem;
-      color: var(--text-sub);
-      margin-bottom: 16px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 12px;
-    }
-
-    .card {
-      background: var(--card);
-      border-radius: 10px;
-      padding: 12px 14px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.03);
-    }
-
-    .label {
-      font-size: 0.75rem;
-      color: var(--text-sub);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    .value {
-      font-size: 1.3rem;
-      margin-top: 4px;
-    }
-
-    .small {
-      font-size: 0.85rem;
-      color: var(--text-sub);
-      margin-top: 4px;
-    }
-
-    .row {
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      align-items: baseline;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 2px 6px;
-      border-radius: 999px;
-      font-size: 0.7rem;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: var(--text-sub);
-    }
-
-    .badge.up {
-      border-color: var(--success);
-      color: var(--success);
-    }
-
-    .badge.down {
-      border-color: var(--danger);
-      color: var(--danger);
-    }
-
-    .alert-log {
-      max-height: 120px;
-      overflow-y: auto;
-      font-size: 0.8rem;
-      margin-top: 6px;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
-      padding-top: 4px;
-    }
-
-    .alert-item {
-      margin-bottom: 2px;
-      color: var(--danger);
-    }
-
-    iframe {
-      border: none;
-      width: 100%;
-      height: 320px;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    @media (max-width: 600px) {
-      body {
-        padding: 10px;
-      }
-
-      h1 {
-        font-size: 1.2rem;
-      }
-
-      .card {
-        padding: 10px;
-      }
-
-      .value {
-        font-size: 1.1rem;
-      }
-
-      iframe {
-        height: 260px;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -148,6 +13,7 @@
   <div class="subtitle">Coincheck / 世界価格 / 半減期 / 金利 / クジラ / アラート</div>
 
   <div class="grid">
+
     <!-- Coincheck -->
     <div class="card">
       <div class="label">Coincheck BTC価格（JPY）</div>
@@ -178,7 +44,7 @@
     <div class="card">
       <div class="label">米国金利（Fed）</div>
       <div class="value" id="fed-rate">準備中</div>
-      <div class="small" id="fed-note">※ 後で FRED / ニュースAPI に接続</div>
+      <div class="small" id="fed-note">※ 後で FRED API に接続</div>
     </div>
 
     <!-- クジラ -->
@@ -188,26 +54,21 @@
       <div class="small">※ 後で Whale Alert API に接続</div>
     </div>
 
-    <!-- アラート設定 -->
+    <!-- アラート -->
     <div class="card">
       <div class="label">アラート設定（Coincheck BTC/JPY）</div>
-      <div class="small">※ ブラウザ内でのみ動作（通知は画面内＋alert）</div>
 
-      <div class="small" style="margin-top:6px;">変動率アラート（%）</div>
+      <div class="small">変動率アラート（%）</div>
       <div class="row">
         <input id="alert-percent" type="number" value="3" style="width:60px;">
         <span class="small">以上動いたら通知</span>
       </div>
 
       <div class="small" style="margin-top:6px;">上抜けアラート（円）</div>
-      <div class="row">
-        <input id="alert-above" type="number" placeholder="例: 10000000" style="width:120px;">
-      </div>
+      <input id="alert-above" type="number" placeholder="例: 10000000">
 
       <div class="small" style="margin-top:6px;">下抜けアラート（円）</div>
-      <div class="row">
-        <input id="alert-below" type="number" placeholder="例: 9000000" style="width:120px;">
-      </div>
+      <input id="alert-below" type="number" placeholder="例: 9000000">
 
       <div class="alert-log" id="alert-log"></div>
     </div>
@@ -219,183 +80,11 @@
         src="https://s.tradingview.com/widgetembed/?symbol=BITFLYER:BTCJPY&interval=60&hidesidetoolbar=1&symboledit=1&saveimage=0&toolbarbg=0f0f1a&studies=[]&theme=dark&style=1&timezone=Asia%2FTokyo&withdateranges=1&hideideas=1&hidelegend=0"
         loading="lazy">
       </iframe>
-      <div class="small">※ 取引所は例として bitFlyer。Coincheck にこだわるなら埋め込み先を調整。</div>
     </div>
+
   </div>
 
-  <script>
-    const API_BASE = '/api'; // Workers を同じドメインにぶら下げる想定
-
-    let lastCcPrice = null;
-
-    function logAlert(msg) {
-      const log = document.getElementById('alert-log');
-      const div = document.createElement('div');
-      div.className = 'alert-item';
-      const t = new Date().toLocaleTimeString();
-      div.textContent = `[${t}] ${msg}`;
-      log.prepend(div);
-    }
-
-    async function fetchCoincheck() {
-      try {
-        const res = await fetch(`${API_BASE}/coincheck`);
-        const data = await res.json();
-
-        const price = Number(data.last);
-        const bid = Number(data.bid);
-        const ask = Number(data.ask);
-        const ts = Number(data.timestamp) * 1000;
-
-        document.getElementById('cc-price').textContent = '¥ ' + price.toLocaleString();
-        document.getElementById('cc-bidask').textContent =
-          'Bid: ¥ ' + bid.toLocaleString() + ' / Ask: ¥ ' + ask.toLocaleString();
-        document.getElementById('cc-lasttime').textContent =
-          '最終更新: ' + new Date(ts).toLocaleString();
-
-        // 変化率バッジ
-        const badge = document.getElementById('cc-change-badge');
-        if (lastCcPrice !== null && lastCcPrice > 0) {
-          const diff = price - lastCcPrice;
-          const pct = (diff / lastCcPrice) * 100;
-          const pctStr = pct.toFixed(2) + '%';
-          badge.textContent = '変化率: ' + pctStr;
-          badge.classList.remove('up', 'down');
-          if (pct > 0) badge.classList.add('up');
-          if (pct < 0) badge.classList.add('down');
-
-          checkAlerts(price, pct);
-        } else {
-          badge.textContent = '変化率: -';
-        }
-        lastCcPrice = price;
-      } catch (e) {
-        document.getElementById('cc-price').textContent = 'エラー';
-        console.error(e);
-      }
-    }
-
-    async function fetchCoingecko() {
-      try {
-        const res = await fetch(`${API_BASE}/coingecko`);
-        const data = await res.json();
-        const priceUSD = data.market_data.current_price.usd;
-        const priceJPY = data.market_data.current_price.jpy;
-        const volume = data.market_data.total_volume.usd;
-
-        document.getElementById('cg-price-jpy').textContent = '¥ ' + priceJPY.toLocaleString();
-        document.getElementById('cg-price-usd').textContent = '$ ' + priceUSD.toLocaleString();
-        document.getElementById('cg-volume').textContent =
-          '24時間出来高（USD）: $ ' + volume.toLocaleString();
-      } catch (e) {
-        document.getElementById('cg-price-jpy').textContent = 'エラー';
-        console.error(e);
-      }
-    }
-
-    async function fetchHalving() {
-      try {
-        const res = await fetch(`${API_BASE}/halving`);
-        const data = await res.json();
-        const next = new Date(data.nextHalving);
-        document.getElementById('halving-date').textContent =
-          '推定日時: ' + next.toLocaleString();
-
-        function updateCountdown() {
-          const now = new Date();
-          const diff = next - now;
-          if (diff <= 0) {
-            document.getElementById('halving-countdown').textContent = '到達済み';
-            return;
-          }
-          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-          const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-          const mins = Math.floor((diff / (1000 * 60)) % 60);
-          document.getElementById('halving-countdown').textContent =
-            `${days}日 ${hours}時間 ${mins}分`;
-        }
-        updateCountdown();
-        setInterval(updateCountdown, 60 * 1000);
-      } catch (e) {
-        document.getElementById('halving-countdown').textContent = 'エラー';
-        console.error(e);
-      }
-    }
-
-    async function fetchFed() {
-      try {
-        const res = await fetch(`${API_BASE}/fed`);
-        const data = await res.json();
-        if (data.rate == null) {
-          document.getElementById('fed-rate').textContent = '未接続';
-        } else {
-          document.getElementById('fed-rate').textContent = data.rate + '%';
-        }
-        if (data.note) {
-          document.getElementById('fed-note').textContent = data.note;
-        }
-      } catch (e) {
-        document.getElementById('fed-rate').textContent = 'エラー';
-        console.error(e);
-      }
-    }
-
-    async function fetchWhale() {
-      try {
-        const res = await fetch(`${API_BASE}/whale`);
-        const data = await res.json();
-        document.getElementById('whale-info').textContent = data.info || '未接続';
-      } catch (e) {
-        document.getElementById('whale-info').textContent = 'エラー';
-        console.error(e);
-      }
-    }
-
-    function checkAlerts(price, pct) {
-      const percentInput = document.getElementById('alert-percent');
-      const aboveInput = document.getElementById('alert-above');
-      const belowInput = document.getElementById('alert-below');
-
-      const pctThreshold = Number(percentInput.value) || 0;
-      const above = Number(aboveInput.value) || null;
-      const below = Number(belowInput.value) || null;
-
-      // 変動率
-      if (pctThreshold > 0 && Math.abs(pct) >= pctThreshold) {
-        const msg = `価格が ${pct.toFixed(2)}% 動きました（現在: ¥${price.toLocaleString()}）`;
-        alert(msg);
-        logAlert(msg);
-        percentInput.value = ''; // 一回でリセットしたいなら
-      }
-
-      // 上抜け
-      if (above && price >= above) {
-        const msg = `価格が上抜け: ¥${above.toLocaleString()}（現在: ¥${price.toLocaleString()}）`;
-        alert(msg);
-        logAlert(msg);
-        aboveInput.value = '';
-      }
-
-      // 下抜け
-      if (below && price <= below) {
-        const msg = `価格が下抜け: ¥${below.toLocaleString()}（現在: ¥${price.toLocaleString()}）`;
-        alert(msg);
-        logAlert(msg);
-        belowInput.value = '';
-      }
-    }
-
-    // 初期化
-    fetchCoincheck();
-    fetchCoingecko();
-    fetchHalving();
-    fetchFed();
-    fetchWhale();
-
-    setInterval(fetchCoincheck, 5000);
-    setInterval(fetchCoingecko, 15000);
-    // Fed / Whale / Halving はそんなに頻繁に更新しなくていい
-  </script>
+  <script src="script.js"></script>
 </body>
 
 </html>
