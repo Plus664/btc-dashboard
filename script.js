@@ -9,6 +9,27 @@ function notify(msg) {
   }
 }
 
+let alertSettings = {
+  pct: null,
+  above: null,
+  below: null,
+};
+
+document.getElementById("set-alert-percent").onclick = () => {
+  alertSettings.pct = Number(document.getElementById("alert-percent").value);
+  logAlert(`変動率アラートを ${alertSettings.pct}% に設定しました`);
+};
+
+document.getElementById("set-alert-above").onclick = () => {
+  alertSettings.above = Number(document.getElementById("alert-above").value);
+  logAlert(`上抜けアラートを ¥${alertSettings.above.toLocaleString()} に設定しました`);
+};
+
+document.getElementById("set-alert-below").onclick = () => {
+  alertSettings.below = Number(document.getElementById("alert-below").value);
+  logAlert(`下抜けアラートを ¥${alertSettings.below.toLocaleString()} に設定しました`);
+};
+
 let lastAlertTime = {
   pct: 0,
   above: 0,
@@ -149,46 +170,36 @@ async function fetchWhale() {
 }
 
 function checkAlerts(price, pct) {
-  const pctTh = Number(document.getElementById("alert-percent").value);
-  const above = Number(document.getElementById("alert-above").value);
-  const below = Number(document.getElementById("alert-below").value);
-
   const sound = document.getElementById("alert-sound");
 
-  // --- 変動率アラート ---
-  if (pctTh && Math.abs(pct) >= pctTh && canAlert("pct")) {
+  // 変動率
+  if (alertSettings.pct && Math.abs(pct) >= alertSettings.pct && canAlert("pct")) {
     const msg = `価格が ${pct.toFixed(2)}% 動きました（現在: ¥${price.toLocaleString()}）`;
-
     sound.play();
     notify(msg);
     alert(msg);
     logAlert(msg);
-
-    document.getElementById("alert-percent").value = "";
+    alertSettings.pct = null;
   }
 
-  // --- 上抜けアラート ---
-  if (above && price >= above && canAlert("above")) {
-    const msg = `上抜け: ¥${above.toLocaleString()}（現在: ¥${price.toLocaleString()}）`;
-
+  // 上抜け
+  if (alertSettings.above && price >= alertSettings.above && canAlert("above")) {
+    const msg = `上抜け: ¥${alertSettings.above.toLocaleString()}（現在: ¥${price.toLocaleString()}）`;
     sound.play();
     notify(msg);
     alert(msg);
     logAlert(msg);
-
-    document.getElementById("alert-above").value = "";
+    alertSettings.above = null;
   }
 
-  // --- 下抜けアラート ---
-  if (below && price <= below && canAlert("below")) {
-    const msg = `下抜け: ¥${below.toLocaleString()}（現在: ¥${price.toLocaleString()}）`;
-
+  // 下抜け
+  if (alertSettings.below && price <= alertSettings.below && canAlert("below")) {
+    const msg = `下抜け: ¥${alertSettings.below.toLocaleString()}（現在: ¥${price.toLocaleString()}）`;
     sound.play();
     notify(msg);
     alert(msg);
     logAlert(msg);
-
-    document.getElementById("alert-below").value = "";
+    alertSettings.below = null;
   }
 }
 

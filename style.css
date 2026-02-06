@@ -99,6 +99,27 @@ iframe {
   border-radius: 10px;
 }
 
+/* 注意書き（相場判断ガイド） */
+.guide-card {
+  margin-top: 20px;
+  padding: 16px;
+  background: #1e1e28;
+  border-radius: 8px;
+  line-height: 1.6;
+  font-size: 14px;
+  color: #ddd;
+}
+
+.guide-card b {
+  color: #fff;
+}
+
+.guide-card u {
+  color: #3ba7ff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
 @media (max-width: 600px) {
   body {
     padding: 10px;
