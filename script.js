@@ -145,18 +145,6 @@ async function fetchHalving() {
   setInterval(update, 60000);
 }
 
-async function fetchFed() {
-  const res = await fetch(`${API_BASE}/fed`);
-  const data = await res.json();
-
-  document.getElementById("fed-rate").textContent =
-    data.rate == null ? "未接続" : data.rate + "%";
-
-  if (data.note) {
-    document.getElementById("fed-note").textContent = data.note;
-  }
-}
-
 async function fetchWhale() {
   const res = await fetch(`${API_BASE}/whale`);
   const data = await res.json();
@@ -264,9 +252,10 @@ window.addEventListener("load", () => {
       }]
     },
     options: {
+      animation: false,
       responsive: true,
       scales: {
-        x: { display: false },
+        x: { display: true },
         y: {
           ticks: {
             callback: v => "¥" + v.toLocaleString()
@@ -280,7 +269,6 @@ window.addEventListener("load", () => {
 fetchCoincheck();
 fetchOrderbook();
 fetchHalving();
-fetchFed();
 fetchWhale();
 
 setInterval(fetchCoincheck, 3000);

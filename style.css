@@ -99,6 +99,12 @@ iframe {
   border-radius: 10px;
 }
 
+#btcChart {
+  width: 85% !important;
+  margin: 0 auto;
+  display: block;
+}
+
 .chart-range-buttons {
   margin-bottom: 8px;
 }
