@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <title>BTC ダッシュボード</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <audio id="alert-sound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+</head>
+
+<body>
+  <h1>BTC ダッシュボード</h1>
+  <div class="subtitle">Coincheck / 世界価格 / 半減期 / 金利 / クジラ / アラート</div>
+
+  <div class="grid">
+
+    <!-- Coincheck -->
+    <div class="card">
+      <div class="label">Coincheck BTC価格（JPY）</div>
+      <div class="row">
+        <div id="cc-price" class="value">読み込み中...</div>
+        <div id="cc-change-badge" class="badge">変化率: -</div>
+      </div>
+      <div id="cc-bidask" class="small"></div>
+      <div id="cc-lasttime" class="small"></div>
+    </div>
+
+    <!-- 板情報 -->
+    <div class="card">
+      <div class="label">板情報（Orderbook）</div>
+      <div id="orderbook-bids" class="small"></div>
+      <div id="orderbook-asks" class="small"></div>
+    </div>
+
+    <!-- 半減期 -->
+    <div class="card">
+      <div class="label">次の半減期</div>
+      <div class="value" id="halving-countdown">読み込み中...</div>
+      <div class="small" id="halving-date"></div>
+    </div>
+
+    <!-- クジラ -->
+    <div class="card">
+      <div class="label">クジラの動き</div>
+      <div class="value" id="whale-info">準備中</div>
+      <div class="small">※ 後で Whale Alert API に接続</div>
+    </div>
+
+    <!-- アラート -->
+    <div class="card">
+      <div class="label">アラート設定（Coincheck BTC/JPY）</div>
+
+      <div class="small">変動率アラート（%）</div>
+      <div class="small">変動率アラート（%）</div>
+      <div class="row">
+        <input id="alert-percent" type="number" value="1" style="width:60px;">
+        <button id="set-alert-percent">設定</button>
+      </div>
+
+      <div class="small" style="margin-top:6px;">上抜けアラート（円）</div>
+      <div class="row">
+        <input id="alert-above" type="number" placeholder="例: 10000000">
+        <button id="set-alert-above">設定</button>
+      </div>
+
+      <div class="small" style="margin-top:6px;">下抜けアラート（円）</div>
+      <div class="row">
+        <input id="alert-below" type="number" placeholder="例: 9000000">
+        <button id="set-alert-below">設定</button>
+      </div>
+
+      <div class="alert-log" id="alert-log"></div>
+    </div>
+
+    <!-- チャート -->
+    <div class="card chart-wide">
+      <div class="label">チャート（BTC/JPY）</div>
+      <div class="chart-range-buttons">
+        <button data-range="1H">1H</button>
+        <button data-range="1D">1D</button>
+        <button data-range="1W">1W</button>
+        <button data-range="1M">1M</button>
+        <button data-range="1Y">1Y</button>
+      </div>
+      <canvas id="btcChart" height="320"></canvas>
+    </div>
+
+  </div>
+
+  <div class="card guide-card">
+    <div class="label">BTCダッシュボードの見方（相場判断ガイド）</div>
+    <div class="small">
+
+      <b>■ 1. Coincheck BTC価格（JPY）</b><br>
+      ・急に動いたら短期勢が動いているサイン<br>
+      ・直近の高値を超える → 上昇トレンド入りしやすい<br>
+      ・直近の安値を割る → 下落トレンド入りしやすい<br>
+      <u>買い得：</u> 安値を割らずに反発した時 / 売り板が薄い時<br>
+      <u>売り得：</u> 高値を超えられず反落した時 / 買い板が薄い時<br><br>
+
+      <b>■ 2. 変化率（%）</b><br>
+      ・±0.3% → 小さな波<br>
+      ・±1% → 明確な動き<br>
+      ・±3% → ニュース or クジラ級の変動<br>
+      <u>買い得：</u> マイナスが縮小してプラスに転じた瞬間<br>
+      <u>売り得：</u> プラスが縮小してマイナスに転じた瞬間<br><br>
+
+      <b>■ 3. 板情報（Orderbook）</b><br>
+      ・買い板が厚い → 下値が固い（落ちにくい）<br>
+      ・売り板が厚い → 上値が重い（上がりにくい）<br>
+      <u>買い得：</u> 買い板が急に厚くなった時<br>
+      <u>売り得：</u> 売り板が急に厚くなった時<br><br>
+
+      <b>■ 4. チャート（BTC/JPY）</b><br>
+      ・右肩上がり → 買いが強い<br>
+      ・右肩下がり → 売りが強い<br>
+      <u>買い得：</u> 安値が切り上がっている / 押し目で反発<br>
+      <u>売り得：</u> 高値が切り下がっている / 戻りで失速<br><br>
+
+      <b>■ 5. 半減期</b><br>
+      ・半減期前後はボラティリティが上がりやすい<br>
+      <u>買い得：</u> 半減期の半年〜1年前の静かな時期<br>
+      <u>売り得：</u> 半減期直後の過熱感が強い時<br><br>
+
+      <b>■ 6. クジラの動き</b><br>
+      ・大口送金量が増える → 相場が動く前兆<br>
+      <u>買い得：</u> 大口送金量↑ ＋ 価格↑（買い集め）<br>
+      <u>売り得：</u> 大口送金量↑ ＋ 価格↓（売り抜け）<br><br>
+
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js")
+    }
+  </script>
+</body>
+
+</html>

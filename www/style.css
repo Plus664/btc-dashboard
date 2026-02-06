@@ -1,0 +1,174 @@
+:root {
+  --bg: #0b0b0f;
+  --card: #171720;
+  --accent: #3ba7ff;
+  --text-main: #f5f5f5;
+  --text-sub: #a0a0b0;
+  --danger: #ff4d6a;
+  --success: #3bd17f;
+}
+
+body {
+  margin: 0;
+  padding: 16px;
+  font-family: system-ui, sans-serif;
+  background: radial-gradient(circle at top, #1b1b2a 0, #050509 55%, #000 100%);
+  color: var(--text-main);
+}
+
+h1 {
+  margin: 0 0 4px;
+  font-size: 1.4rem;
+}
+
+.subtitle {
+  font-size: 0.85rem;
+  color: var(--text-sub);
+  margin-bottom: 16px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.card {
+  background: var(--card);
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+}
+
+.label {
+  font-size: 0.75rem;
+  color: var(--text-sub);
+  text-transform: uppercase;
+}
+
+.value {
+  font-size: 1.3rem;
+  margin-top: 4px;
+}
+
+.small {
+  font-size: 0.85rem;
+  color: var(--text-sub);
+  margin-top: 4px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.badge {
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.badge.up {
+  color: var(--success);
+  border-color: var(--success);
+}
+
+.badge.down {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.alert-log {
+  max-height: 120px;
+  overflow-y: auto;
+  font-size: 0.8rem;
+  margin-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.alert-item {
+  color: var(--danger);
+}
+
+iframe {
+  width: 100%;
+  height: 320px;
+  border: none;
+  border-radius: 10px;
+}
+
+.chart-wide {
+  grid-column: span 3;
+}
+
+#btcChart {
+  width: 85% !important;
+  margin: 0 auto;
+  display: block;
+}
+
+.chart-range-buttons {
+  margin-bottom: 8px;
+}
+
+.chart-range-buttons button {
+  margin-right: 6px;
+  padding: 4px 8px;
+  background: #2a2a35;
+  color: #fff;
+  border: 1px solid #444;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.chart-range-buttons button:hover {
+  background: #3ba7ff;
+  border-color: #3ba7ff;
+}
+
+.chart-range-buttons button.active {
+  background: #3ba7ff;
+  border-color: #3ba7ff;
+  color: #000;
+}
+
+/* 注意書き（相場判断ガイド） */
+.guide-card {
+  margin-top: 20px;
+  padding: 16px;
+  background: #1e1e28;
+  border-radius: 8px;
+  line-height: 1.6;
+  font-size: 14px;
+  color: #ddd;
+}
+
+.guide-card b {
+  color: #fff;
+}
+
+.guide-card u {
+  color: #3ba7ff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 10px;
+  }
+
+  h1 {
+    font-size: 1.2rem;
+  }
+
+  .value {
+    font-size: 1.1rem;
+  }
+
+  iframe {
+    height: 260px;
+  }
+}
