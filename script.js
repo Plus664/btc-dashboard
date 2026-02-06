@@ -1,3 +1,27 @@
+// 通知許可をリクエスト
+if (Notification && Notification.permission !== "granted") {
+  Notification.requestPermission();
+}
+
+function notify(msg) {
+  if (Notification.permission === "granted") {
+    new Notification("BTC Alert", { body: msg });
+  }
+}
+
+let lastAlertTime = {
+  pct: 0,
+  above: 0,
+  below: 0,
+};
+
+function canAlert(type) {
+  const now = Date.now();
+  if (now - lastAlertTime[type] < 60000) return false; // 60秒
+  lastAlertTime[type] = now;
+  return true;
+}
+
 const API_BASE = "/api";
 
 let lastCcPrice = null;
@@ -41,45 +65,40 @@ async function fetchCoincheck() {
     }
 
     lastCcPrice = price;
+
+    // --- チャート更新（ここが重要） ---
+    chartData.push({
+      time: Math.floor(ts / 1000),
+      value: price,
+    });
+
+    if (chartData.length > 100) chartData.shift();
+
+    lineSeries.setData(chartData);
+
   } catch (e) {
     document.getElementById("cc-price").textContent = "エラー";
   }
 }
 
-async function fetchCoingecko() {
+async function fetchOrderbook() {
   try {
-    const res = await fetch(`${API_BASE}/coingecko`);
+    const res = await fetch("/api/orderbook");
     const data = await res.json();
 
-    console.log("coingecko data:", data);
+    const bids = data.bids.slice(0, 5)
+      .map(b => `¥${Number(b[0]).toLocaleString()} (${b[1]})`)
+      .join("<br>");
 
-    const priceUSD = data?.market_data?.current_price?.usd ?? null;
-    const priceJPY = data?.market_data?.current_price?.jpy ?? null;
-    const volumeUSD = data?.market_data?.total_volume?.usd ?? null;
+    const asks = data.asks.slice(0, 5)
+      .map(a => `¥${Number(a[0]).toLocaleString()} (${a[1]})`)
+      .join("<br>");
 
-    if (!priceUSD || !priceJPY) {
-      document.getElementById("cg-price-jpy").textContent = "エラー";
-      document.getElementById("cg-price-usd").textContent = "";
-      document.getElementById("cg-volume").textContent = "";
-      return;
-    }
-
-    document.getElementById("cg-price-jpy").textContent =
-      "¥ " + priceJPY.toLocaleString();
-
-    document.getElementById("cg-price-usd").textContent =
-      "$ " + priceUSD.toLocaleString();
-
-    if (volumeUSD) {
-      document.getElementById("cg-volume").textContent =
-        "24時間出来高: $" + volumeUSD.toLocaleString();
-    } else {
-      document.getElementById("cg-volume").textContent = "24時間出来高: -";
-    }
+    document.getElementById("orderbook-bids").innerHTML = `<b>Bids</b><br>${bids}`;
+    document.getElementById("orderbook-asks").innerHTML = `<b>Asks</b><br>${asks}`;
 
   } catch (e) {
-    console.error("fetchCoingecko error:", e);
-    document.getElementById("cg-price-jpy").textContent = "エラー";
+    console.error("orderbook error:", e);
   }
 }
 
@@ -131,33 +150,77 @@ function checkAlerts(price, pct) {
   const above = Number(document.getElementById("alert-above").value);
   const below = Number(document.getElementById("alert-below").value);
 
-  if (pctTh && Math.abs(pct) >= pctTh) {
+  const sound = document.getElementById("alert-sound");
+
+  // --- 変動率アラート ---
+  if (pctTh && Math.abs(pct) >= pctTh && canAlert("pct")) {
     const msg = `価格が ${pct.toFixed(2)}% 動きました（現在: ¥${price.toLocaleString()}）`;
+
+    sound.play();
+    notify(msg);
     alert(msg);
     logAlert(msg);
+
     document.getElementById("alert-percent").value = "";
   }
 
-  if (above && price >= above) {
+  // --- 上抜けアラート ---
+  if (above && price >= above && canAlert("above")) {
     const msg = `上抜け: ¥${above.toLocaleString()}（現在: ¥${price.toLocaleString()}）`;
+
+    sound.play();
+    notify(msg);
     alert(msg);
     logAlert(msg);
+
     document.getElementById("alert-above").value = "";
   }
 
-  if (below && price <= below) {
+  // --- 下抜けアラート ---
+  if (below && price <= below && canAlert("below")) {
     const msg = `下抜け: ¥${below.toLocaleString()}（現在: ¥${price.toLocaleString()}）`;
+
+    sound.play();
+    notify(msg);
     alert(msg);
     logAlert(msg);
+
     document.getElementById("alert-below").value = "";
   }
 }
 
+// --- チャート初期化 ---
+const chartContainer = document.getElementById("chart-container");
+const chart = LightweightCharts.createChart(chartContainer, {
+  layout: {
+    background: { color: "#171720" },
+    textColor: "#ffffff",
+  },
+  grid: {
+    vertLines: { color: "rgba(255,255,255,0.05)" },
+    horzLines: { color: "rgba(255,255,255,0.05)" },
+  },
+  timeScale: {
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  rightPriceScale: {
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+});
+
+const lineSeries = chart.addLineSeries({
+  color: "#3ba7ff",
+  lineWidth: 2,
+});
+
+// チャート用のデータ保持
+let chartData = [];
+
 fetchCoincheck();
-fetchCoingecko();
+fetchOrderbook();
 fetchHalving();
 fetchFed();
 fetchWhale();
 
 setInterval(fetchCoincheck, 3000);
-setInterval(fetchCoingecko, 3000);
+setInterval(fetchOrderbook, 3000);

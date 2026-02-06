@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="style.css">
 
   <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+  <audio id="alert-sound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
 
   <script src="script.js" defer></script>
 </head>
@@ -29,12 +30,11 @@
       <div id="cc-lasttime" class="small"></div>
     </div>
 
-    <!-- CoinGecko -->
+    <!-- 板情報 -->
     <div class="card">
-      <div class="label">世界平均 BTC価格</div>
-      <div class="value" id="cg-price-jpy">読み込み中...</div>
-      <div class="small" id="cg-price-usd"></div>
-      <div class="small" id="cg-volume"></div>
+      <div class="label">板情報（Orderbook）</div>
+      <div id="orderbook-bids" class="small"></div>
+      <div id="orderbook-asks" class="small"></div>
     </div>
 
     <!-- 半減期 -->
@@ -79,11 +79,8 @@
 
     <!-- チャート -->
     <div class="card">
-      <div class="label">チャート（TradingView BTC/JPY）</div>
-      <iframe
-        src="https://s.tradingview.com/widgetembed/?symbol=BITFLYER:BTCJPY&interval=60&hidesidetoolbar=1&symboledit=1&saveimage=0&toolbarbg=0f0f1a&studies=[]&theme=dark&style=1&timezone=Asia%2FTokyo&withdateranges=1&hideideas=1&hidelegend=0"
-        loading="lazy">
-      </iframe>
+      <div class="label">チャート（BTC/JPY）</div>
+      <div id="chart-container" style="height: 320px;"></div>
     </div>
 
   </div>
