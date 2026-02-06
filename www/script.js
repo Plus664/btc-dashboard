@@ -98,7 +98,7 @@ async function fetchCoincheck() {
 
     lastCcPrice = price;
 
-    // --- チャート更新（ここが重要） ---
+    // --- チャート更新---
     if (btcChart) {
       const t = new Date(ts);
       fullChartData.push({ time: t, price });
@@ -283,4 +283,5 @@ fetchHalving();
 fetchWhale();
 
 setInterval(fetchCoincheck, 3000);
+
 setInterval(fetchOrderbook, 3000);
