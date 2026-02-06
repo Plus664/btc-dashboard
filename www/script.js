@@ -43,7 +43,7 @@ function canAlert(type) {
   return true;
 }
 
-const API_BASE = "https://btc-api.soccer710a.workers.dev";
+const API_BASE = "https://btc-api.soccer710a.workers.dev/api";
 
 let lastCcPrice = null;
 
