@@ -44,6 +44,7 @@ async function fetchCoincheck() {
 
     lastCcPrice = price;
   } catch (e) {
+    console.error("error", e)
     document.getElementById("cc-price").textContent = "エラー";
   }
 }
@@ -145,3 +146,4 @@ fetchWhale();
 setInterval(fetchCoincheck, 3000);
 
 setInterval(fetchCoingecko, 3000);
+
