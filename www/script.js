@@ -60,7 +60,7 @@ async function subscribePush() {
 
   const sub = await reg.pushManager.subscribe({
     userVisibleOnly: true,
-    applicationServerKey: "BAkjGNHWbVmW7zuol7AugAr53mxBD89pZw9HQycPdSVsGRvPhGznZ5FiZGrLLsLH_41D9Q8DlhqHBDNIUzpa6QY"
+    applicationServerKey: "BIKUXwzjhHTwy1kJfuwTRIC6DXeg2Hquq0XtmuJfpZmPpA6RNh4-K8LQ07VxOlBwag0PzzSqtMz4Haa1IkHYGos"
   })
 
   console.log("subscribed:", JSON.stringify(sub))
@@ -289,4 +289,5 @@ fetchHalving();
 fetchWhale();
 
 setInterval(fetchCoincheck, 3000);
+
 setInterval(fetchOrderbook, 3000);
