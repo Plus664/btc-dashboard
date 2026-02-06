@@ -99,6 +99,10 @@ iframe {
   border-radius: 10px;
 }
 
+.chart-wide {
+  grid-column: span 3;
+}
+
 #btcChart {
   width: 85% !important;
   margin: 0 auto;
