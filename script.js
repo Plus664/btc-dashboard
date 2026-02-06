@@ -44,7 +44,7 @@ async function fetchCoincheck() {
 
     lastCcPrice = price;
   } catch (e) {
-    console.error("error", e)
+    console.error("Coincheck Error: ", e)
     document.getElementById("cc-price").textContent = "エラー";
   }
 }
@@ -63,6 +63,7 @@ async function fetchCoingecko() {
     document.getElementById("cg-volume").textContent =
       "24時間出来高: $" + volume.toLocaleString();
   } catch (e) {
+    console.error("Coingecko Error", e)
     document.getElementById("cg-price-jpy").textContent = "エラー";
   }
 }
@@ -146,4 +147,5 @@ fetchWhale();
 setInterval(fetchCoincheck, 3000);
 
 setInterval(fetchCoingecko, 3000);
+
 
