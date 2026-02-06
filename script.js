@@ -15,6 +15,8 @@ async function fetchCoincheck() {
     const res = await fetch(`${API_BASE}/coincheck`);
     const data = await res.json();
 
+    console.log("coincheck data: ", data);
+
     const price = Number(data.last);
     const bid = Number(data.bid);
     const ask = Number(data.ask);
@@ -141,4 +143,5 @@ fetchFed();
 fetchWhale();
 
 setInterval(fetchCoincheck, 3000);
+
 setInterval(fetchCoingecko, 3000);
