@@ -65,7 +65,7 @@ async function subscribePush() {
 
   console.log("subscribed:", JSON.stringify(sub))
 
-  await fetch(`${API_BASE}/subscribe`, {
+  await fetch(`${API_BASE}/push`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(sub)
@@ -291,3 +291,4 @@ fetchWhale();
 setInterval(fetchCoincheck, 3000);
 
 setInterval(fetchOrderbook, 3000);
+
