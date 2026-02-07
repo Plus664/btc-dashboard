@@ -1,0 +1,14 @@
+name = "btc-api"           # Worker名
+main = "worker.js"         # メインスクリプト
+compatibility_date = "2026-02-07"
+type = "javascript"
+
+# KVバインディング
+kv_namespaces = [
+  { binding = "BTC_KV", id = "78229bddd5e54a3db5acb5f437f2208f" }
+]
+
+# 簡単にデバッグできるようにローカル開発用設定
+[dev]
+ip = "127.0.0.1"
+port = 8787

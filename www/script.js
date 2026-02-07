@@ -3,41 +3,6 @@ if (Notification && Notification.permission !== "granted") {
   Notification.requestPermission();
 }
 
-// --- Push購読 ---
-async function initPush() {
-  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
-
-  // Service Worker登録
-  const sw = await navigator.serviceWorker.register('/sw.js');
-  console.log('SW登録完了');
-
-  // Push Subscription
-  const sub = await sw.pushManager.subscribe({
-    userVisibleOnly: true,
-    applicationServerKey: urlBase64ToUint8Array('BKhQikGofOHRlLd32HRi0NRxsxIMfbFirFomIcdRyQdsyEE7SKY3_82do_W6AKJ5XCIf35yBLip8kXXTNaxKCTA') // ← ここにVercel公開鍵
-  });
-
-  // Vercel Functionに送信して保存
-  await fetch('https://your-vercel-domain.vercel.app/api/subscribe', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(sub)
-  });
-
-  console.log('Push購読完了');
-}
-
-// Base64URL → Uint8Array
-function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
-  const rawData = atob(base64);
-  return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
-}
-
-// 初期化
-initPush().catch(console.error);
-
 function notify(msg) {
   if (Notification.permission === "granted") {
     new Notification("BTC Alert", { body: msg });
@@ -156,34 +121,32 @@ async function fetchOrderbook() {
 }
 
 async function fetchHalving() {
-  const res = await fetch(`${API_BASE}/halving`);
-  const data = await res.json();
-  const next = new Date(data.nextHalving);
+  try {
+    // 固定値を返す想定（例: 2024/04/01）
+    const next = new Date("2024-04-01T00:00:00Z");
 
-  document.getElementById("halving-date").textContent =
-    "推定日時: " + next.toLocaleString();
+    document.getElementById("halving-date").textContent =
+      "推定日時: " + next.toLocaleString();
 
-  function update() {
-    const now = new Date();
-    const diff = next - now;
-    if (diff <= 0) return;
+    function update() {
+      const now = new Date();
+      const diff = next - now;
+      if (diff <= 0) return;
 
-    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    const m = Math.floor((diff / (1000 * 60)) % 60);
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const m = Math.floor((diff / (1000 * 60)) % 60);
 
-    document.getElementById("halving-countdown").textContent =
-      `${d}日 ${h}時間 ${m}分`;
+      document.getElementById("halving-countdown").textContent =
+        `${d}日 ${h}時間 ${m}分`;
+    }
+
+    update();
+    setInterval(update, 60000);
+
+  } catch (e) {
+    console.error("Halving fetch error:", e);
   }
-
-  update();
-  setInterval(update, 60000);
-}
-
-async function fetchWhale() {
-  const res = await fetch(`${API_BASE}/whale`);
-  const data = await res.json();
-  document.getElementById("whale-info").textContent = data.info;
 }
 
 function checkAlerts(price, pct) {
@@ -271,19 +234,27 @@ function updateChartRange(range) {
   btcChart.update();
 }
 
-window.addEventListener("load", () => {
-  const ctx = document.getElementById("btcChart").getContext("2d");
+async function initChart() {
+  const res = await fetch(`${API_BASE}/ohlc`);
+  const ohlc = await res.json();
 
+  fullChartData = ohlc.map(d => ({
+    time: new Date(d.time),
+    price: d.price
+  }));
+
+  const ctx = document.getElementById("btcChart").getContext("2d");
   btcChart = new Chart(ctx, {
     type: "line",
     data: {
-      labels: chartLabels,
+      labels: fullChartData.map(d => d.time.toLocaleString()),
       datasets: [{
         label: "BTC/JPY",
-        data: chartPrices,
+        data: fullChartData.map(d => d.price),
         borderColor: "#3ba7ff",
         borderWidth: 2,
         tension: 0.2,
+        pointRadius: 0
       }]
     },
     options: {
@@ -291,20 +262,20 @@ window.addEventListener("load", () => {
       responsive: true,
       scales: {
         x: { display: true },
-        y: {
-          ticks: {
-            callback: v => "¥" + v.toLocaleString()
-          }
-        }
+        y: { ticks: { callback: v => "¥" + v.toLocaleString() } }
       }
     }
   });
+
+  updateChartRange(currentRange);
+}
+
+window.addEventListener("load", async () => {
+  await initChart();
+  fetchCoincheck();
+  fetchOrderbook();
+  fetchHalving();
+
+  setInterval(fetchCoincheck, 3000);
+  setInterval(fetchOrderbook, 3000);
 });
-
-fetchCoincheck();
-fetchOrderbook();
-fetchHalving();
-fetchWhale();
-
-setInterval(fetchCoincheck, 3000);
-setInterval(fetchOrderbook, 3000);
