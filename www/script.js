@@ -60,7 +60,7 @@ async function subscribePush() {
 
   const sub = await reg.pushManager.subscribe({
     userVisibleOnly: true,
-    applicationServerKey: "BIKUXwzjhHTwy1kJfuwTRIC6DXeg2Hquq0XtmuJfpZmPpA6RNh4-K8LQ07VxOlBwag0PzzSqtMz4Haa1IkHYGos"
+    applicationServerKey: "BKhQikGofOHRlLd32HRi0NRxsxIMfbFirFomIcdRyQdsyEE7SKY3_82do_W6AKJ5XCIf35yBLip8kXXTNaxKCTA"
   })
 
   console.log("subscribed:", JSON.stringify(sub))
