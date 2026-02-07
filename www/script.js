@@ -3,6 +3,41 @@ if (Notification && Notification.permission !== "granted") {
   Notification.requestPermission();
 }
 
+// --- Push購読 ---
+async function initPush() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+
+  // Service Worker登録
+  const sw = await navigator.serviceWorker.register('/sw.js');
+  console.log('SW登録完了');
+
+  // Push Subscription
+  const sub = await sw.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: urlBase64ToUint8Array('BKhQikGofOHRlLd32HRi0NRxsxIMfbFirFomIcdRyQdsyEE7SKY3_82do_W6AKJ5XCIf35yBLip8kXXTNaxKCTA') // ← ここにVercel公開鍵
+  });
+
+  // Vercel Functionに送信して保存
+  await fetch('https://your-vercel-domain.vercel.app/api/subscribe', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(sub)
+  });
+
+  console.log('Push購読完了');
+}
+
+// Base64URL → Uint8Array
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+  const rawData = atob(base64);
+  return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+}
+
+// 初期化
+initPush().catch(console.error);
+
 function notify(msg) {
   if (Notification.permission === "granted") {
     new Notification("BTC Alert", { body: msg });
@@ -53,23 +88,6 @@ function logAlert(msg) {
   div.className = "alert-item";
   div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
   log.prepend(div);
-}
-
-async function subscribePush() {
-  const reg = await navigator.serviceWorker.ready
-
-  const sub = await reg.pushManager.subscribe({
-    userVisibleOnly: true,
-    applicationServerKey: "BKhQikGofOHRlLd32HRi0NRxsxIMfbFirFomIcdRyQdsyEE7SKY3_82do_W6AKJ5XCIf35yBLip8kXXTNaxKCTA"
-  })
-
-  console.log("subscribed:", JSON.stringify(sub))
-
-  await fetch(`${API_BASE}/subscribe`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(sub)
-  })
 }
 
 async function fetchCoincheck() {
