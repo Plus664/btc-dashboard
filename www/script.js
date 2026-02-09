@@ -68,6 +68,32 @@ function checkAlerts(price, pct) {
 }
 
 // --- API取得 & チャート更新 ---
+async function updateChartRange(range) {
+  currentRange = range;
+
+  // ボタンの見た目更新
+  document.querySelectorAll(".chart-range-buttons button").forEach(b => {
+    b.classList.toggle("active", b.dataset.range === range);
+  });
+
+  // ★重要：期間を切り替えたらWorkerからその期間の履歴を再取得する
+  try {
+    const res = await fetch(`${API_BASE}/history?range=${range}`);
+    const data = await res.json();
+
+    if (data && data.length > 0) {
+      fullChartData = data.map(d => ({
+        time: new Date(d.time),
+        price: Number(d.price)
+      }));
+    }
+
+    // チャートを描画更新
+    updateChart();
+  } catch (e) {
+    console.error("History range fetch error:", e);
+  }
+}
 
 async function fetchCoincheck() {
   try {
@@ -87,6 +113,8 @@ async function fetchCoincheck() {
       badge.textContent = `変化率: ${pct.toFixed(2)}%`;
       badge.className = "badge " + (pct > 0 ? "up" : "down");
       checkAlerts(price, pct);
+
+      checkPastPrediction(price);
     }
     lastCcPrice = price;
 
@@ -193,7 +221,7 @@ document.querySelectorAll(".chart-range-buttons button").forEach(btn => {
     document.querySelectorAll(".chart-range-buttons button").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     currentRange = btn.dataset.range;
-    updateChart();
+    updateChartRange(currentRange);
   };
 });
 
@@ -242,9 +270,59 @@ async function fetchHistory() {
   }
 }
 
+document.getElementById("lock-prediction").onclick = () => {
+  const currentPrice = lastCcPrice;
+  const predictLabel = document.getElementById("ai-label").textContent;
+
+  // ローカルストレージに「1時間後に答え合わせする予約」を保存
+  const record = {
+    time: Date.now(),
+    startPrice: currentPrice,
+    prediction: predictLabel,
+    checked: false
+  };
+  localStorage.setItem("pending_check", JSON.stringify(record));
+  alert("予測を記録しました。1時間後にサイトを開くと結果が出ます！");
+};
+
+// --- 的中率の表示を更新する関数 ---
+function updateWinStatsDisplay() {
+  const stats = JSON.parse(localStorage.getItem("btc_win_stats") || '{"win":0, "total":0}');
+  const rate = stats.total === 0 ? 0 : ((stats.win / stats.total) * 100).toFixed(1);
+  const el = document.getElementById("win-rate");
+  if (el) el.textContent = `${rate}% (勝:${stats.win}/計:${stats.total})`;
+}
+
+// --- 過去の予測を判定する関数 ---
+function checkPastPrediction(currentPrice) {
+  const saved = localStorage.getItem("pending_check");
+  if (!saved) return;
+  const data = JSON.parse(saved);
+
+  // 1時間以上経過していたら判定（3600000ms = 1時間）
+  if (!data.checked && Date.now() - data.time > 3600000) {
+    const isUp = currentPrice > data.startPrice;
+    const actualTrend = isUp ? "上昇傾向" : "下落傾向";
+    const isWin = (data.prediction === actualTrend);
+
+    // 勝敗を記録
+    const stats = JSON.parse(localStorage.getItem("btc_win_stats") || '{"win":0, "total":0}');
+    stats.total += 1;
+    if (isWin) stats.win += 1;
+    localStorage.setItem("btc_win_stats", JSON.stringify(stats));
+
+    alert(`【予測結果】\n判定: ${isWin ? "的中！" : "外れ"}\n当時の価格: ¥${data.startPrice.toLocaleString()}\n現在価格: ¥${currentPrice.toLocaleString()}`);
+
+    data.checked = true;
+    localStorage.setItem("pending_check", JSON.stringify(data));
+    updateWinStatsDisplay();
+  }
+}
+
 // --- 修正：ページ読み込み時の処理 ---
 window.addEventListener("load", async () => {
   await initChart();
+  updateWinStatsDisplay();
   await fetchHistory(); // まず過去ログを読み込む ★追加
   await fetchCoincheck(); // その後、最新価格を取得
   fetchOrderbook();

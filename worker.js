@@ -48,14 +48,22 @@ export default {
     }
 
     if (path === '/api/history') {
-      const list = await env.BTC_KV.list({ prefix: 'hist_', limit: 100 }); // 最大100件取得
+      const range = url.searchParams.get('range') || '1H';
+
+      // 期間に応じて取得件数を変える
+      let limit = 100; // 1H用
+      if (range === '1D') limit = 300; // 1D用
+      if (range === '1W') limit = 500; // 1W用
+      if (range === '1M') limit = 1000; // 1M用
+
+      const list = await env.BTC_KV.list({ prefix: 'hist_', limit: limit });
       const history = [];
       for (const key of list.keys) {
         const val = await env.BTC_KV.get(key.name);
-        // キー名 'hist_1707450000000' からタイムスタンプ部分を抽出
         const ts = parseInt(key.name.split('_')[1]);
         history.push({ time: ts, price: val });
       }
+      history.sort((a, b) => a.time - b.time);
       return new Response(JSON.stringify(history), { headers: CORS_HEADERS });
     }
 

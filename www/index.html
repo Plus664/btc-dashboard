@@ -29,6 +29,27 @@
       <div id="cc-lasttime" class="small"></div>
     </div>
 
+    <div class="card">
+      <div class="label">AI価格予測</div>
+      <div class="row">
+        <select id="predict-range"
+          style="background: #2a2a35; color: #fff; border: 1px solid #444; border-radius: 4px;">
+          <option value="1H">1時間後</option>
+          <option value="1D">1日後</option>
+          <option value="1W">1週間後</option>
+          <option value="1M">1ヶ月後</option>
+        </select>
+        <div id="ai-label" class="badge">算出中...</div>
+      </div>
+      <div id="ai-price-predict" class="value" style="margin-top: 10px;">¥ --</div>
+      <div id="ai-reason" class="small" style="color: var(--accent);">分析データを蓄積中...</div>
+
+      <div id="accuracy-stats" style="margin-top:10px; border-top:1px solid #444; padding-top:10px;">
+        的中率: <span id="win-rate">--</span>%
+        <button id="lock-prediction" style="background:#444; font-size:10px;">予測を記録</button>
+      </div>
+    </div>
+
     <!-- 板情報 -->
     <div class="card">
       <div class="label">板情報（Orderbook）</div>
@@ -82,22 +103,6 @@
       <div id="chart-container">
         <canvas id="btcChart"></canvas>
       </div>
-    </div>
-
-    <div class="card">
-      <div class="label">AI価格予測</div>
-      <div class="row">
-        <select id="predict-range"
-          style="background: #2a2a35; color: #fff; border: 1px solid #444; border-radius: 4px;">
-          <option value="1H">1時間後</option>
-          <option value="1D">1日後</option>
-          <option value="1W">1週間後</option>
-          <option value="1M">1ヶ月後</option>
-        </select>
-        <div id="ai-label" class="badge">算出中...</div>
-      </div>
-      <div id="ai-price-predict" class="value" style="margin-top: 10px;">¥ --</div>
-      <div id="ai-reason" class="small" style="color: var(--accent);">分析データを蓄積中...</div>
     </div>
 
   </div>
