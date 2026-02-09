@@ -234,40 +234,123 @@ function updateChartRange(range) {
   btcChart.update();
 }
 
+async function fetchAI() {
+  const range = document.getElementById("predict-range").value;
+  try {
+    const res = await fetch(`${API_BASE}/ai-predict?range=${range}`);
+    const data = await res.json();
+
+    // UI更新
+    const labelEl = document.getElementById("ai-label");
+    const priceEl = document.getElementById("ai-price-predict");
+    const reasonEl = document.getElementById("ai-reason");
+
+    labelEl.textContent = data.predictionLabel;
+    labelEl.className = "badge " + (data.predictionLabel === "上昇傾向" ? "ai-up" : data.predictionLabel === "下落傾向" ? "ai-down" : "");
+    priceEl.textContent = "¥ " + data.futurePoints[4].price.toLocaleString(); // 5ステップ先の価格
+    reasonEl.textContent = `判定スコア: ${data.score} (${range}予測)`;
+
+    return data.futurePoints;
+  } catch (e) {
+    console.error("AI fetch error:", e);
+    return [];
+  }
+}
+
+async function updateChart() {
+  // 実績データの取得
+  await fetchCoincheck();
+
+  // AI予測データの取得
+  const futurePoints = await fetchAI();
+
+  // チャートデータの更新
+  const now = new Date();
+  const history = fullChartData.filter(d => d.time > new Date(now - getCutoff(currentRange)));
+
+  // 実績データセット
+  btcChart.data.labels = history.map(d => formatLabel(d.time, currentRange));
+  btcChart.data.datasets[0].data = history.map(d => d.price);
+
+  // 予測データセット（実績の最後から繋げる）
+  if (futurePoints.length > 0) {
+    const lastPoint = history[history.length - 1];
+    const predictData = new Array(history.length - 1).fill(null);
+    predictData.push(lastPoint ? lastPoint.price : null); // 接続点
+
+    futurePoints.forEach(p => {
+      predictData.push(p.price);
+      btcChart.data.labels.push("予測"); // 未来のラベル
+    });
+    btcChart.data.datasets[1].data = predictData;
+  }
+
+  btcChart.update('none'); // アニメーションなしで更新
+}
+
+function getCutoff(range) {
+  const m = 60 * 1000;
+  if (range === "1H") return 60 * m;
+  if (range === "1D") return 24 * 60 * m;
+  if (range === "1W") return 7 * 24 * 60 * m;
+  return 30 * 24 * 60 * m;
+}
+
+function formatLabel(date, range) {
+  if (range === "1H") return date.toLocaleTimeString([], { minute: '2-digit' });
+  return (date.getMonth() + 1) + "/" + date.getDate();
+}
+
 async function initChart() {
-  const res = await fetch(`${API_BASE}/ohlc`);
-  const ohlc = await res.json();
-
-  fullChartData = ohlc.map(d => ({
-    time: new Date(d.time),
-    price: d.price
-  }));
-
   const ctx = document.getElementById("btcChart").getContext("2d");
+
   btcChart = new Chart(ctx, {
     type: "line",
     data: {
-      labels: fullChartData.map(d => d.time.toLocaleString()),
-      datasets: [{
-        label: "BTC/JPY",
-        data: fullChartData.map(d => d.price),
-        borderColor: "#3ba7ff",
-        borderWidth: 2,
-        tension: 0.2,
-        pointRadius: 0
-      }]
+      labels: [],
+      datasets: [
+        {
+          label: "実績",
+          data: [],
+          borderColor: "#3ba7ff",
+          borderWidth: 2,
+          pointRadius: 0,
+          tension: 0.2
+        },
+        {
+          label: "予測",
+          data: [],
+          borderColor: "#3ba7ff",
+          borderWidth: 2,
+          borderDash: [5, 5], // 点線設定
+          pointRadius: 0,
+          tension: 0.2
+        }
+      ]
     },
     options: {
       animation: false,
+      maintainAspectRatio: false, // コンテナに合わせる
       responsive: true,
       scales: {
-        x: { display: true },
-        y: { ticks: { callback: v => "¥" + v.toLocaleString() } }
-      }
+        x: {
+          grid: { display: false },
+          ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 5 } // ラベル重なり防止
+        },
+        y: {
+          position: 'right', // 右側に価格
+          ticks: { font: { size: 10 }, callback: v => v.toLocaleString() }
+        }
+      },
+      plugins: { legend: { display: false } }
     }
   });
 
-  updateChartRange(currentRange);
+  // 初回実行
+  await updateChart();
+
+  // セレクトボックス連動
+  document.getElementById("predict-range").onchange = updateChart;
 }
 
 window.addEventListener("load", async () => {
