@@ -47,6 +47,18 @@ export default {
       }), { headers: CORS_HEADERS });
     }
 
+    if (path === '/api/history') {
+      const list = await env.BTC_KV.list({ prefix: 'hist_', limit: 100 }); // 最大100件取得
+      const history = [];
+      for (const key of list.keys) {
+        const val = await env.BTC_KV.get(key.name);
+        // キー名 'hist_1707450000000' からタイムスタンプ部分を抽出
+        const ts = parseInt(key.name.split('_')[1]);
+        history.push({ time: ts, price: val });
+      }
+      return new Response(JSON.stringify(history), { headers: CORS_HEADERS });
+    }
+
     // どのパスにも当てはまらない場合
     return new Response('Path Not Found', { status: 404, headers: CORS_HEADERS });
   },

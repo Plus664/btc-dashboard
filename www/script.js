@@ -221,12 +221,35 @@ async function initChart() {
   });
 }
 
+// --- 追加：Workerから過去ログを取得する関数 ---
+async function fetchHistory() {
+  try {
+    // Workerに「過去ログちょうだい」とリクエスト（エンドポイントは後でWorker側で作ります）
+    const res = await fetch(`${API_BASE}/history`);
+    const data = await res.json(); // [{time: 1234567, price: 11000000}, ...]
+
+    if (data && data.length > 0) {
+      // 取得したデータをチャート用の変数に流し込む
+      fullChartData = data.map(d => ({
+        time: new Date(d.time),
+        price: Number(d.price)
+      }));
+      // 時間順に並び替え
+      fullChartData.sort((a, b) => a.time - b.time);
+    }
+  } catch (e) {
+    console.error("History fetch error:", e);
+  }
+}
+
+// --- 修正：ページ読み込み時の処理 ---
 window.addEventListener("load", async () => {
   await initChart();
-  fetchCoincheck(); // これが updateChart を呼び出す
+  await fetchHistory(); // まず過去ログを読み込む ★追加
+  await fetchCoincheck(); // その後、最新価格を取得
   fetchOrderbook();
   fetchHalving();
 
-  setInterval(fetchCoincheck, 5000); // 3秒だとAPI制限が怖いので5秒に緩和
+  setInterval(fetchCoincheck, 5000);
   setInterval(fetchOrderbook, 5000);
 });
