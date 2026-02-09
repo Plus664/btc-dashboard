@@ -29,6 +29,21 @@
       <div id="cc-lasttime" class="small"></div>
     </div>
 
+    <!-- チャート -->
+    <div class="card chart-wide">
+      <div class="label">チャート（BTC/JPY）</div>
+      <div class="chart-range-buttons">
+        <button data-range="1H">1H</button>
+        <button data-range="1D">1D</button>
+        <button data-range="1W">1W</button>
+        <button data-range="1M">1M</button>
+        <button data-range="1Y">1Y</button>
+      </div>
+      <div id="chart-container">
+        <canvas id="btcChart"></canvas>
+      </div>
+    </div>
+
     <div class="card">
       <div class="label">AI価格予測</div>
       <div class="row">
@@ -90,21 +105,6 @@
       <div class="alert-log" id="alert-log"></div>
     </div>
 
-    <!-- チャート -->
-    <div class="card chart-wide">
-      <div class="label">チャート（BTC/JPY）</div>
-      <div class="chart-range-buttons">
-        <button data-range="1H">1H</button>
-        <button data-range="1D">1D</button>
-        <button data-range="1W">1W</button>
-        <button data-range="1M">1M</button>
-        <button data-range="1Y">1Y</button>
-      </div>
-      <div id="chart-container">
-        <canvas id="btcChart"></canvas>
-      </div>
-    </div>
-
   </div>
 
   <div class="card guide-card">
@@ -158,5 +158,6 @@
     }
   </script>
 </body>
+
 
 </html>
