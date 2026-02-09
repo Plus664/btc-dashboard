@@ -29,8 +29,10 @@ h1 {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 12px;
+  /* 画面幅に合わせて、最小320pxのカードを自動で並べる */
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 20px;
+  align-items: start;
 }
 
 .card {
@@ -109,9 +111,9 @@ iframe {
   width: 100%;
 }
 
-#btcChart {
+canvas#btcChart {
   width: 100% !important;
-  height: 100% !important;
+  max-height: 100% !important;
 }
 
 .chart-range-buttons {
@@ -216,6 +218,11 @@ select:focus {
     padding: 10px;
   }
 
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
   h1 {
     font-size: 1.2rem;
   }
@@ -226,5 +233,11 @@ select:focus {
 
   iframe {
     height: 260px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .chart-wide {
+    grid-column: span 2;
   }
 }

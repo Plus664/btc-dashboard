@@ -39,7 +39,8 @@ export default {
     }
 
     if (path === '/api/halving') {
-      const nextHalving = new Date('2028-04-20T00:00:00Z');
+      // 第5回半減期（2028年4月頃）をターゲットにする
+      const nextHalving = new Date('2028-04-17T00:00:00Z');
       return new Response(JSON.stringify({
         nextHalving: nextHalving.toISOString(),
         daysRemaining: Math.ceil((nextHalving.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
