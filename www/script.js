@@ -216,7 +216,6 @@ function formatLabel(date, range) {
 }
 
 // --- 初期化 ---
-
 document.querySelectorAll(".chart-range-buttons button").forEach(btn => {
   btn.onclick = () => {
     document.querySelectorAll(".chart-range-buttons button").forEach(b => b.classList.remove("active"));
@@ -254,7 +253,7 @@ async function initChart() {
 async function fetchHistory() {
   try {
     // Workerに「過去ログちょうだい」とリクエスト（エンドポイントは後でWorker側で作ります）
-    const res = await fetch(`${API_BASE}/history`);
+    const res = await fetch(`${API_BASE}/history?key=${KEY}`);
     const data = await res.json(); // [{time: 1234567, price: 11000000}, ...]
 
     if (data && data.length > 0) {
