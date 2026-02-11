@@ -5,7 +5,8 @@ const CORS_HEADERS = {
   'Content-Type': 'application/json',
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': '*'
+  'Access-Control-Allow-Headers': '*',
+  'X-Robots-Tag': 'noindex, nofollow, noarchive',
 };
 
 export default {
@@ -13,7 +14,18 @@ export default {
     if (request.method === 'OPTIONS') return new Response(null, { headers: CORS_HEADERS });
 
     const url = new URL(request.url);
+    const key = url.searchParams.get('key');
+
+    if (key !== "secsecsecsecsec") {
+      return new Response('Forbidden', { status: 403 });
+    }
     const path = url.pathname;
+
+    if (path === '/robots.txt') {
+      return new Response("User-agent:*\nDisallow: /", {
+        headers: { "Content-Type": "text/plain" }
+      });
+    }
 
     // --- 最新価格取得 ---
     if (path === '/api/coincheck') {

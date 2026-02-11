@@ -1,5 +1,5 @@
 // --- 設定 ---
-const API_BASE = "https://btc-api.soccer710a.workers.dev/api";
+const API_BASE = "https://btc-api.soccer710a.workers.dev/api?key=secsecsecsecsec";
 let btcChart;
 let fullChartData = [];
 let currentRange = "1H";
