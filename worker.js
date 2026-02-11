@@ -15,11 +15,11 @@ export default {
 
     const url = new URL(request.url);
     const key = url.searchParams.get('key');
+    const path = url.pathname;
 
     if (key !== "secsecsecsecsec") {
-      return new Response('Forbidden', { status: 403 });
+      return new Response('Forbidden', { status: 403, headers: CORS_HEADERS });
     }
-    const path = url.pathname;
 
     if (path === '/robots.txt') {
       return new Response("User-agent:*\nDisallow: /", {

@@ -1,5 +1,6 @@
 // --- 設定 ---
-const API_BASE = "https://btc-api.soccer710a.workers.dev/api?key=secsecsecsecsec";
+const KEY = "secsecsecsecsec";
+const API_BASE = "https://btc-api.soccer710a.workers.dev/api";
 let btcChart;
 let fullChartData = [];
 let currentRange = "1H";
@@ -97,7 +98,7 @@ async function updateChartRange(range) {
 
 async function fetchCoincheck() {
   try {
-    const res = await fetch(`${API_BASE}/coincheck`);
+    const res = await fetch(`${API_BASE}/coincheck?key=${KEY}`);
     const data = await res.json();
     const price = Number(data.last);
     const ts = Number(data.timestamp) * 1000;
@@ -128,7 +129,7 @@ async function fetchCoincheck() {
 
 async function fetchOrderbook() {
   try {
-    const res = await fetch(`${API_BASE}/orderbook`);
+    const res = await fetch(`${API_BASE}/orderbook?key=${KEY}`);
     const data = await res.json();
     const bidHtml = data.bids.slice(0, 5).map(b => `¥${Number(b[0]).toLocaleString()} (${b[1]})`).join("<br>");
     const askHtml = data.asks.slice(0, 5).map(a => `¥${Number(a[0]).toLocaleString()} (${a[1]})`).join("<br>");
@@ -140,7 +141,7 @@ async function fetchOrderbook() {
 async function fetchHalving() {
   try {
     // Workerの /api/halving から最新を取得
-    const res = await fetch(`${API_BASE}/halving`);
+    const res = await fetch(`${API_BASE}/halving?key=${KEY}`);
     const data = await res.json();
     const nextDate = new Date(data.nextHalving);
 
@@ -162,7 +163,7 @@ async function fetchHalving() {
 async function fetchAI() {
   const range = document.getElementById("predict-range").value;
   try {
-    const res = await fetch(`${API_BASE}/ai-predict?range=${range}`);
+    const res = await fetch(`${API_BASE}/ai-predict?key=${KEY}&range=${range}`);
     const data = await res.json();
     document.getElementById("ai-label").textContent = data.predictionLabel;
     document.getElementById("ai-label").className = "badge " + (data.predictionLabel === "上昇傾向" ? "ai-up" : data.predictionLabel === "下落傾向" ? "ai-down" : "");
